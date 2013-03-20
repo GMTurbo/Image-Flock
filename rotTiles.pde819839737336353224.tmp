@@ -1,0 +1,138 @@
+
+ArrayList<diamond> diamonds = new ArrayList<diamond>();
+PImage image = null;
+
+void setup(){
+  size(800, 800, P3D);
+  frameRate(60);
+  initialize();
+}
+
+int offsetX = 0;
+int offsetY = 0;
+
+void initialize(){
+  float size = 5;
+  offsetX = int( width/(2*size) * sqrt(2) );
+  offsetY = int( height/(2*size) * sqrt(2) );
+  for(int i = 0 ; i < width/size ; i++)
+   for(int j = 0 ; j <height/size ; j++){
+      if(j == 0)
+        diamonds.add(new diamond(i * width/size * sqrt(2) - offsetX, j*height/size * sqrt(2) - offsetY, int(size), int(size)));
+      diamonds.add(new diamond(i * width/size * sqrt(2), j*height/size * sqrt(2), int(size), int(size))); 
+      diamonds.add(new diamond(offsetX + i * width/size * sqrt(2),offsetY + j*height/size * sqrt(2), int(size), int(size))); 
+   }
+  
+   image = loadImage("http://25.media.tumblr.com/tumblr_mccw0d3J6y1r2zp8wo1_500.jpg");
+}
+float timeStep = 0;
+void draw(){
+  background(0);
+  image.resize(width, height);
+  img(image, 0, 0);
+  //lights();
+  for(diamond d : diamonds){
+     d.draw(timeStep); 
+  }
+  
+  timeStep += 0.2;
+  timeStep = timeStep%1.0;
+  
+  stroke(0);
+  line(mouseX, mouseY, pmouseX, pmouseY);
+  
+}
+
+void mouseMoved(){
+  
+   selectDiamondAt(mouseX, mouseY);
+   //timeStep = 0;
+}
+
+void selectDiamondAt(int x, int y){
+  
+  for(diamond d : diamonds){
+      //d.selected = false;
+      d.selected = d.underPoint(x, y); 
+  }
+}
+
+class diamond{
+ int centerX = 0;
+ int centerY = 0;
+ int xx = 0;
+ int yy = 0;
+ int w = 10;
+ int h = 10;
+ boolean selected = false;
+ 
+ diamond(int x, int y, int wid, int he) {
+   centerX = x;
+   centerY = y;
+   w = wid;
+   h = he;
+   xx = centerX + w/2;
+   yy = centerY + h/2;
+   c = getRandomColor();
+ }
+ 
+ diamond(float x, float y, int wid, int he) {
+  centerX = ceil(x); 
+  centerY = ceil(y); 
+  w = wid; 
+  h = he; 
+  xx = centerX + w/2; 
+  yy = centerY + h/2; 
+  c = getRandomColor();
+}
+ 
+ color c = 0;
+ 
+ color getRandomColor(){
+    return color(random(0,1)* 255, random(0,1)*255, random(0,1)*255); 
+ }
+ 
+ boolean underPoint(int x, int y){
+     //rect(x, y, 5, 5);
+
+    if(abs(x - xx) < 50 && abs(y - yy) < 50){
+      println(this + " is under the mouse");
+      println("x: " + x +" y: " + y +" | centerX: " + xx +" centerY: " + yy);
+    }
+    return abs(x - xx) < 50 && abs(y - yy) < 50; 
+ }
+ 
+ void draw(float timeStep){
+     update(timeStep);
+     fill(c);
+     stroke(0);
+     
+     pushMatrix();
+     
+     translate(centerX, centerY);
+     rotate(radians(45));
+     translate(width/10, height/10);
+     rotateY(-rotation);
+     translate(-width/10, -height/10);
+     rect(0, 0, width/5 , height/5);
+      
+     popMatrix();
+     
+     //rotation -= 0.1;
+     //if(rotation < 0)
+     //  rotation = 0;
+ }
+ 
+ float rotation = 0;
+ 
+ void update(float timeStep){
+  // timestep between 0 and 1
+  //rotate PI at 1
+    if(selected){
+       rotation = PI * timeStep; 
+    }
+    else
+      rotation = 0;
+ }
+   
+}
